@@ -1,19 +1,20 @@
-// SPDX-License-Identifier: MIT
-pragma solidity >=0.4.22 <0.9.0;
+// "SPDX-License-Identifier: MIT"
+pragma solidity 0.4.18;
 
-contract Migrations {
-  address public owner = msg.sender;
-  uint public last_completed_migration;
+// Declare contract
+contract Greetings {
+    string message;
 
-  modifier restricted() {
-    require(
-      msg.sender == owner,
-      "This function is restricted to the contract's owner"
-    );
-    _;
-  }
+    // Acts like a static singleton when called from outside
+    function Greetings() public {
+        message = "I'm ready!";
+    }
 
-  function setCompleted(uint completed) public restricted {
-    last_completed_migration = completed;
-  }
+    function setGreetings(string memory _message) public {
+        message = _message;
+    }
+
+    function getGreetings() public view returns (string memory) {
+        return message;
+    }
 }
