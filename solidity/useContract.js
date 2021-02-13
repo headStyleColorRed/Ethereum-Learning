@@ -14,9 +14,18 @@ let account = '0x2599845311ea8CBee9Da50C1161C2c90a2B06205';
 // Contract instance
 let MyContract = new web3.eth.Contract(contractABI, contractAddress);
 
-// console.log(MyContract);
-MyContract.methods.getGreetings().call({
-    from: account
-}).then((res) => {
-    console.log(res);
-})
+function getGreeting() {
+    MyContract.methods.getGreetings().call({
+        from: account
+    }).then((res) => {
+        console.log(res);
+    })
+}
+
+function setaGreeting() {
+    MyContract.methods.setGreetings("Hello world").send({ from: account }).then((res) => {
+        console.log(res);
+    })
+}
+
+getGreeting()
