@@ -60,3 +60,6 @@ Another way to avoid double spending is by registering every transaction that is
 
 ### Sending ether
     -eth.sendTransaction({from: eth.coinbase, to: eth.accounts[1], value: web3.toWei(10, "ether")})
+
+## Creating Solidity Files
+1. I

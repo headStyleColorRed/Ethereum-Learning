@@ -1,3 +1,5 @@
 private/geth
 private/keystore/
 password.sec
+package-lock.json
+node_modules/
