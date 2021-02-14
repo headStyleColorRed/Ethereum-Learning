@@ -38,13 +38,14 @@ const solc = require("solc");
 const fs = require("fs");
 const Web3 = require("web3");
 const web3 = new Web3("http://127.0.0.1:7545");
+const contractName = "greetings.sol"
 
 // 2. Smart Contract compilation
 var input = {
     language: "Solidity",
     sources: {
-        'saluten.sol' : {
-            content: fs.readFileSync("./app/saluten.sol", "utf8").toString()
+        'greetings.sol' : {
+            content: fs.readFileSync("./greetings.sol", "utf8").toString()
         }
     },
     settings: {
@@ -60,12 +61,13 @@ const CompiledContract = JSON.parse(solc.compile(JSON.stringify(input)));
 
 
 // 3. Data preparation
-let contractABI = CompiledContract.contracts['saluten.sol'].NumberStorage.abi
-let bytecode = CompiledContract.contracts['saluten.sol'].NumberStorage.evm.bytecode.object
+console.log(CompiledContract.contracts[contractName][contractName]);
+let contractABI = CompiledContract.contracts[contractName].abi
+let bytecode = CompiledContract.contracts[contractName].evm.bytecode.object
 
 // 4. Contract object and account address
 let deployedContract = new web3.eth.Contract(contractABI);
-let account = '0xdCC9F2874f78C04dDEED66e51C83c1652A73E663'; // A Ganache application's account address
+let account = '0x079b9082bb334B12dfb388C394C9D4031AF794f7'; // A Ganache application's account address
 
 // 5. Parameters we are going to pass
 let payload = {

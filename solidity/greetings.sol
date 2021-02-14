@@ -1,9 +1,9 @@
 // "SPDX-License-Identifier: UNLICENSED"
-pragma solidity >=0.4.18;
+pragma solidity >=0.8.0;
 
 // Declare contract
 contract Greetings {
-    string message;
+    string message ;
 
     // Acts like a static singleton when called from outside
     constructor() public {
