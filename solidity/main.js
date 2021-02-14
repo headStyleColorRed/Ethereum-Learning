@@ -38,7 +38,7 @@ const solc = require("solc");
 const fs = require("fs");
 const Web3 = require("web3");
 const web3 = new Web3("http://127.0.0.1:7545");
-const contractName = "greetings.sol"
+const contractName = "Greetings"
 
 // 2. Smart Contract compilation
 var input = {
@@ -61,9 +61,13 @@ const CompiledContract = JSON.parse(solc.compile(JSON.stringify(input)));
 
 
 // 3. Data preparation
-console.log(CompiledContract.contracts[contractName][contractName]);
-let contractABI = CompiledContract.contracts[contractName].abi
-let bytecode = CompiledContract.contracts[contractName].evm.bytecode.object
+if (CompiledContract["errors"]) {
+     console.log(CompiledContract["errors"]);
+    return
+}
+
+let contractABI = CompiledContract.contracts['greetings.sol']['NumberStorage'].abi
+let bytecode = CompiledContract.contracts['greetings.sol']['NumberStorage'].evm.bytecode.object
 
 // 4. Contract object and account address
 let deployedContract = new web3.eth.Contract(contractABI);

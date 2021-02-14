@@ -1,20 +1,15 @@
-// "SPDX-License-Identifier: UNLICENSED"
-pragma solidity >=0.8.0;
+// "SPDX-License-Identifier: MIT"
+pragma solidity 0.7.4;
+contract NumberStorage {
+    uint storedNumber;
 
-// Declare contract
-contract Greetings {
-    string message ;
-
-    // Acts like a static singleton when called from outside
-    constructor() public {
-        message = "I'm ready!";
+    constructor() {
+        storedNumber = 5;
     }
-
-    function setGreetings(string memory _message) public {
-        message = _message;
+    function setNumber(uint x) public {
+        storedNumber = x;
     }
-
-    function getGreetings() public view returns (string memory) {
-        return message;
+    function getNumber() public view returns (uint) {
+        return storedNumber;
     }
 }
