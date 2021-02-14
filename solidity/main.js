@@ -1,21 +1,73 @@
-// Library Imports
-const Web3 = require('web3');
+// ************************************************************************************************* //
+//
+//  In order to upload a Smart contract we have to follow a series of steps:
+//
+//      1. Library imports
+//          a) solc: .sol file's extension compiler
+//          b) fs: Node native file reader
+//          c) web3: A new web3 instance that connects to Ganache's default port
+//
+//      2.  Smart Contract compilation 
+//          a) Language: Source code language, such as "Solidity", "Vyper", etc.
+//          b) Sources: File name with file's stringed content underneath
+//          c) Settings: Other settings to enable metadata, abi output, etc.
+//          d) CompiledContract: Stringed, compiled and parsed json file with ready output
+//
+//      3. Data preparation
+//          a) ContractABI: Application binary interface that sets the instructions for the EVM
+//          b) Bytecode: Unreadable low-level programming language interpreted by the EVM
+//
+//      4. Contract object and account address
+//          a) DeployedContract: Contract object you feed it the ABI calls from contractABI.
+//          b) Account: Ganache's account that signs the contract transaction
+//      
+//      5. Parameters:
+//          a) Payload: Is an object that contains the bytecode created on compile
+//          b) Parameter.from: Ganache's account that signs the contract transaction
+//          c) Gas: The maximum gas provided for a transaction (gas limit).
+//          d) GasPrice: The gas price in wei to use for transactions.
+//
+//      6. Deploying:
+//          a) First we call deploy with the payload (aka the bytecode object)
+//          b) Then we send the config parameters and wait for the creation success
+//
+// ************************************************************************************************* //
 
-// Connection Initialization
-const rpcURL = "http://127.0.0.1:7545";
-const web3 = new Web3(rpcURL);
-const compiledContract = require("./build/Greetings.json")
+// 1. Library Imports
+const solc = require("solc");
+const fs = require("fs");
+const Web3 = require("web3");
+const web3 = new Web3("http://127.0.0.1:7545");
 
-// Data set up
-let contractABI = compiledContract.abi
-let bytecode = compiledContract.bytecode;
+// 2. Smart Contract compilation
+var input = {
+    language: "Solidity",
+    sources: {
+        'saluten.sol' : {
+            content: fs.readFileSync("./app/saluten.sol", "utf8").toString()
+        }
+    },
+    settings: {
+        outputSelection: {
+            "*": {
+                "*": ["*"]
+            }
+        }
+    }
+};
 
-//Contract object and account info
-let deploy_contract = new web3.eth.Contract(contractABI);
-let account = '0x2599845311ea8CBee9Da50C1161C2c90a2B06205';
+const CompiledContract = JSON.parse(solc.compile(JSON.stringify(input)));
 
 
-// Function Parameter
+// 3. Data preparation
+let contractABI = CompiledContract.contracts['saluten.sol'].NumberStorage.abi
+let bytecode = CompiledContract.contracts['saluten.sol'].NumberStorage.evm.bytecode.object
+
+// 4. Contract object and account address
+let deployedContract = new web3.eth.Contract(contractABI);
+let account = '0xdCC9F2874f78C04dDEED66e51C83c1652A73E663'; // A Ganache application's account address
+
+// 5. Parameters we are going to pass
 let payload = {
     data: bytecode
 }
@@ -26,8 +78,8 @@ let parameter = {
     gasPrice: web3.utils.toHex(web3.utils.toWei('30', 'gwei'))
 }
 
-// Function Call
-deploy_contract.deploy(payload).send(parameter, (err, transactionHash) => {
+// 6. Deploying the smart contract!
+deployedContract.deploy(payload).send(parameter, (err, transactionHash) => {
     console.log('Transaction Hash :', transactionHash);
 }).on('confirmation', () => {}).then((newContractInstance) => {
     console.log('Deployed Contract Address : ', newContractInstance.options.address);
