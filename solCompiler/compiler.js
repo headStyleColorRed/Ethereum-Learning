@@ -38,56 +38,63 @@ const solc = require("solc");
 const fs = require("fs");
 const Web3 = require("web3");
 const web3 = new Web3("http://127.0.0.1:7545");
-const contractName = "Greetings"
 
-// 2. Smart Contract compilation
-var input = {
+async function compileContract(contractFileName, contractName, account) {
+  // 2. Smart Contract compilation
+  var input = {
     language: "Solidity",
     sources: {
-        'greetings.sol' : {
-            content: fs.readFileSync("./greetings.sol", "utf8").toString()
-        }
+      'template': {
+        content: fs.readFileSync(`./${contractFileName}`, "utf8").toString()
+      }
     },
     settings: {
-        outputSelection: {
-            "*": {
-                "*": ["*"]
-            }
+      outputSelection: {
+        "*": {
+          "*": ["*"]
         }
+      }
     }
-};
+  };
 
-const CompiledContract = JSON.parse(solc.compile(JSON.stringify(input)));
+  input.sources[contractFileName] = input.sources['template']
+  delete input.sources['template']
+
+  const CompiledContract = JSON.parse(solc.compile(JSON.stringify(input)));
 
 
-// 3. Data preparation
-if (CompiledContract["errors"]) {
-     console.log(CompiledContract["errors"]);
+  // 3. Data preparation
+  if (CompiledContract["errors"]) {
+    console.log(CompiledContract["errors"]);
     return
-}
+  }
 
-let contractABI = CompiledContract.contracts['greetings.sol']['NumberStorage'].abi
-let bytecode = CompiledContract.contracts['greetings.sol']['NumberStorage'].evm.bytecode.object
+  let contractABI = CompiledContract.contracts[contractFileName][contractName].abi
+  let bytecode = CompiledContract.contracts[contractFileName][contractName].evm.bytecode.object
 
-// 4. Contract object and account address
-let deployedContract = new web3.eth.Contract(contractABI);
-let account = '0x079b9082bb334B12dfb388C394C9D4031AF794f7'; // A Ganache application's account address
+  // 4. Contract object and account address
+  let deployedContract = new web3.eth.Contract(contractABI);
 
-// 5. Parameters we are going to pass
-let payload = {
+  // 5. Parameters we are going to pass
+  let payload = {
     data: bytecode
-}
+  }
 
-let parameter = {
+  let parameter = {
     from: account,
     gas: web3.utils.toHex(800000),
     gasPrice: web3.utils.toHex(web3.utils.toWei('30', 'gwei'))
-}
+  }
 
-// 6. Deploying the smart contract!
-deployedContract.deploy(payload).send(parameter, (err, transactionHash) => {
+  // 6. Deploying the smart contract!
+  deployedContract.deploy(payload).send(parameter, (err, transactionHash) => {
     console.log('Transaction Hash :', transactionHash);
-}).on('confirmation', () => {}).then((newContractInstance) => {
+  }).on('confirmation', () => { }).then((newContractInstance) => {
     console.log('Deployed Contract Address : ', newContractInstance.options.address);
     process.exit()
-})
+  })
+}
+
+module.exports = {
+  compileContract,
+}
