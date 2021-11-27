@@ -24,7 +24,6 @@ contract("ChainList", (accounts) => {
       await instance.sellArticle(articleName, articleDescription, web3.utils.toWei(articlePrice, "ether"), { from: seller })
       let data = await instance.getArticle()
 
-      console.log(data);
       assert.equal(data[0], seller, "Seller must be " + seller)
       assert.equal(data[1], articleName, "Article name must be " + articleName)
       assert.equal(data[2], articleDescription, "Description must be " + articleDescription)
