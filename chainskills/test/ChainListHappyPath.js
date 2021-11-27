@@ -4,7 +4,7 @@ const web3 = require("web3")
 // Test suite
 contract("ChainList", (accounts) => {
     var chainListInstance
-    var seller = accounts[1]
+    var seller = "0x81DF5A7E67221a9232bbc14d11474995e86F0ee9"
     var articleName = "article 1"
     var articleDescription = "Description for article 1"
     var articlePrice = "10"
@@ -21,11 +21,13 @@ contract("ChainList", (accounts) => {
 
     it("Should sell an article", async () => {
       instance = await ChainList.deployed()
-      let data = await instance.sellArticle(articleName, articleDescription, articlePrice, web3.utils.toWei(articlePrice, "ether"), { from: seller })
-      
+      await instance.sellArticle(articleName, articleDescription, web3.utils.toWei(articlePrice, "ether"), { from: seller })
+      let data = await instance.getArticle()
+
+      console.log(data);
       assert.equal(data[0], seller, "Seller must be " + seller)
       assert.equal(data[1], articleName, "Article name must be " + articleName)
       assert.equal(data[2], articleDescription, "Description must be " + articleDescription)
-      assert.equal(data[3].toNumber(), web3.utils.toWei(articlePrice, "ether"), "Price must be " + web3.utils.toWei(articlePrice, "ether"))
+      assert.equal(web3.utils.fromWei(data[3], "ether"), articlePrice, "Price must be " + articlePrice)
     })
 });
