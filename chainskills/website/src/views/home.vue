@@ -15,7 +15,7 @@
           <b>{{ article.name }}</b>
           <p>{{ article.description }}</p>
           <p>Price: {{ article.price }}</p>
-          <p>Owner: {{ article.owner }}</p>
+          <p>Owner: {{ article.seller }}</p>
         </v-card>
       </div>
     </div>
@@ -74,7 +74,7 @@
 <script>
 import uuidv4 from "uuid/v4";
 import Web3Manager from "./../web3/web3Manager.js";
-import web3Manager from './../web3/web3Manager.js';
+import web3Manager from "./../web3/web3Manager.js";
 
 export default {
   data() {
@@ -86,9 +86,9 @@ export default {
       balance: 12.3,
       account: "Not connected",
       newArticle: {
-        name: "",
-        description: "",
-        price: null,
+        name: "Patinete",
+        description: "Some long and undescriptive description",
+        price: 3,
       },
       articles: [
         {
@@ -96,14 +96,14 @@ export default {
           name: "iphone 8",
           description: "A new iphone to show your firends",
           price: 3,
-          owner: "0x0831934182udjh01ihwnxi0h8cdicwn",
+          seller: "0x0831934182udjh01ihwnxi0h8cdicwn",
         },
         {
           id: "82389328",
           name: "iphone 8",
           description: "A new iphone to show your firends",
           price: 3,
-          owner: "0x0831934182udjh01ihwnxi0h8cdicwn",
+          seller: "0x0831934182udjh01ihwnxi0h8cdicwn",
         },
       ],
     };
@@ -116,25 +116,28 @@ export default {
       try {
         let coinbase = await Web3Manager.connectToWeb3(window.ethereum);
         this.account = coinbase;
-        this.getBalance()
+        this.getBalance();
       } catch (err) {
         alert(err);
       }
     },
     async getBalance() {
-      this.balance = await Web3Manager.getBalanceForAccount(this.account)
-      web3Manager.connectToContract()
+      this.balance = await Web3Manager.getBalanceForAccount(this.account);
+      web3Manager.connectToContract();
     },
-    sellNewArticle() {
+    async sellNewArticle() {
       this.dialog = false;
-      let newArticle = {
-        id: uuidv4(),
-        name: this.newArticle.name,
-        description: this.newArticle.description,
-        price: this.newArticle.price,
-        owner: this.account,
-      };
-      console.log(newArticle);
+      try {
+        let rawArticle = await Web3Manager.publishArticle(this.newArticle.name, this.newArticle.description, this.newArticle.price, this.account);
+        this.articles.push({
+          name: rawArticle.name,
+          description: rawArticle.description,
+          price: rawArticle.price,
+          seller: rawArticle.seller,
+        });
+      } catch (err) {
+        alert(err);
+      }
     },
   },
   components: {},

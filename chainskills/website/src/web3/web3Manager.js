@@ -4,6 +4,7 @@ import Web3 from "web3"
 import RawContract from "../assets/ChainList.json"
 
 let web3 = null
+let contract = null
 
 // Should be called right when the view loads
 async function connectToWeb3(ethereum) {
@@ -58,13 +59,31 @@ async function sendMoneyToAnotherAccount(senderAccount, recipientAccount, amount
   })
 }
 
-async function connectToContract() {
+async function connectToContract() { 
   let contract_abi = RawContract.abi
   let contract_address = RawContract.networks["5777"].address
-  const contract = new web3.eth.Contract(contract_abi, contract_address);
+  contract = new web3.eth.Contract(contract_abi, contract_address);
+  this.getArticle()
+}
 
-  let result = await contract.methods.getArticle().call()
-  console.log(result);
+async function getArticle() {
+  let rawArticle = await contract.methods.getArticle().call()
+  console.log(rawArticle);
+  return { 
+    description: rawArticle._description, 
+    name: rawArticle._name, 
+    price: rawArticle._price, 
+    seller: rawArticle._seller
+  }
+}
+
+async function publishArticle(name, description, price, account) {
+  console.log(name);
+  console.log(description);
+  console.log(price);
+  console.log(account);
+  await contract.methods.sellArticle(name, description, price).send({ from: account, gas: 500000 }).catch((err) => { throw err.message })
+  return getArticle().catch((err) => { throw err })
 }
 
 
@@ -74,4 +93,6 @@ export default {
   sendMoneyToAnotherAccount,
   getBalanceForAccount,
   connectToContract,
+  getArticle,
+  publishArticle,
 }
