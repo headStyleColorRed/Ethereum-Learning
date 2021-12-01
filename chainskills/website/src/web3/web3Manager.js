@@ -59,31 +59,46 @@ async function sendMoneyToAnotherAccount(senderAccount, recipientAccount, amount
   })
 }
 
-async function connectToContract() { 
+async function connectToContract() {
   let contract_abi = RawContract.abi
   let contract_address = RawContract.networks["5777"].address
-  contract = new web3.eth.Contract(contract_abi, contract_address);
-  this.getArticle()
+  contract = await new web3.eth.Contract(contract_abi, contract_address);
+  eventListener()
+  return
 }
 
-async function getArticle() {
+async function getLastArticle() {
   let rawArticle = await contract.methods.getArticle().call()
-  console.log(rawArticle);
-  return { 
-    description: rawArticle._description, 
-    name: rawArticle._name, 
-    price: rawArticle._price, 
+  return {
+    description: rawArticle._description,
+    name: rawArticle._name,
+    price: rawArticle._price,
     seller: rawArticle._seller
   }
 }
 
-async function publishArticle(name, description, price, account) {
+function publishArticle(name, description, price, account) {
   console.log(name);
   console.log(description);
   console.log(price);
   console.log(account);
-  await contract.methods.sellArticle(name, description, price).send({ from: account, gas: 500000 }).catch((err) => { throw err.message })
-  return getArticle().catch((err) => { throw err })
+  contract.methods.sellArticle(name, description, price).send({ from: account, gas: 500000 }).catch((err) => { throw err.message })
+}
+
+async function eventListener() {
+  await contract.events.LogSellArticle({
+    filter: {}, fromBlock: 0
+  }, () => { })
+    .on('data', (event) => {
+      // Called at begining, not change);
+    })
+    .on('changed', (event) => {
+      console.log("Event listener changed");
+      console.log(event);
+    })
+    .on('error', (error) => {
+      console.log(`error => ${error}`)
+    });
 }
 
 
@@ -93,6 +108,6 @@ export default {
   sendMoneyToAnotherAccount,
   getBalanceForAccount,
   connectToContract,
-  getArticle,
+  getLastArticle,
   publishArticle,
 }

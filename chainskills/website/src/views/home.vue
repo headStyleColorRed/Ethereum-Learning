@@ -90,22 +90,7 @@ export default {
         description: "Some long and undescriptive description",
         price: 3,
       },
-      articles: [
-        {
-          id: "jifj298hf183cf",
-          name: "iphone 8",
-          description: "A new iphone to show your firends",
-          price: 3,
-          seller: "0x0831934182udjh01ihwnxi0h8cdicwn",
-        },
-        {
-          id: "82389328",
-          name: "iphone 8",
-          description: "A new iphone to show your firends",
-          price: 3,
-          seller: "0x0831934182udjh01ihwnxi0h8cdicwn",
-        },
-      ],
+      articles: new Array(),
     };
   },
   mounted() {
@@ -123,7 +108,9 @@ export default {
     },
     async getBalance() {
       this.balance = await Web3Manager.getBalanceForAccount(this.account);
-      web3Manager.connectToContract();
+      await web3Manager.connectToContract();
+      let lastArticle = await web3Manager.getLastArticle()
+      this.articles.push(lastArticle)
     },
     async sellNewArticle() {
       this.dialog = false;
