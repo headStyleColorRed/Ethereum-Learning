@@ -5,6 +5,7 @@ import RawContract from "../assets/ChainList.json"
 
 let web3 = null
 let contract = null
+let coinbase = null
 
 // Should be called right when the view loads
 async function connectToWeb3(ethereum) {
@@ -17,6 +18,7 @@ async function connectToWeb3(ethereum) {
       // When connection is succesfull it returns an array with all the accounts allowed
       // Example: ['0xa3ecc7991b21236b309fc136b1b61894e8034857]
       web3 = new Web3(ethereum)
+      coinbase = res[0]
       return res[0]
     })
     .catch((err) => {
@@ -63,42 +65,70 @@ async function connectToContract() {
   let contract_abi = RawContract.abi
   let contract_address = RawContract.networks["5777"].address
   contract = await new web3.eth.Contract(contract_abi, contract_address);
-  eventListener()
+  sellEventListener()
+  buyEventListener()
   return
 }
 
 async function getLastArticle() {
   let rawArticle = await contract.methods.getArticle().call()
+  if (isNullAddress(rawArticle._seller)) return null
+
   return {
     description: rawArticle._description,
     name: rawArticle._name,
     price: rawArticle._price,
-    seller: rawArticle._seller
+    seller: rawArticle._seller,
+    buyer: isNullAddress(rawArticle._buyer) ? null : rawArticle._buyer
   }
 }
 
 function publishArticle(name, description, price, account) {
-  console.log(name);
-  console.log(description);
-  console.log(price);
-  console.log(account);
   contract.methods.sellArticle(name, description, price).send({ from: account, gas: 500000 }).catch((err) => { throw err.message })
 }
 
-async function eventListener() {
-  await contract.events.LogSellArticle({
+function buyArticle(value) {
+  contract.methods.buyArticle().send({ from: coinbase, value: web3.utils.toWei(value, "ether") }).catch((err) => { throw err.message })
+}
+
+async function sellEventListener() {
+  await contract.events.LogSellArticle({  
     filter: {}, fromBlock: 0
   }, () => { })
     .on('data', (event) => {
+      console.log("Log Sell Article");
+      console.log(event);
       // Called at begining, not change);
     })
     .on('changed', (event) => {
-      console.log("Event listener changed");
+      console.log("Log Sell Article changed");
       console.log(event);
     })
     .on('error', (error) => {
-      console.log(`error => ${error}`)
+      console.log(`Sell event error => ${error.message}`)
     });
+}
+
+async function buyEventListener() {
+  await contract.events.LogBuyArticle({
+    filter: {}, fromBlock: 0
+  }, () => { })
+    .on('data', (event) => {
+      console.log("Log Buy Article");
+      console.log(event);
+    })
+    .on('changed', (event) => {
+      console.log("Log Buy Article changed");
+      console.log(event);
+    })
+    .on('error', (error) => {
+      console.log(`Buy Event error => ${error.message}`)
+    });
+}
+
+function isNullAddress(address) {
+  if (address == undefined || address == null) return true
+  return address == "0x0000000000000000000000000000000000000000"
 }
 
 
@@ -110,4 +140,6 @@ export default {
   connectToContract,
   getLastArticle,
   publishArticle,
+  buyArticle,
+  isNullAddress,
 }

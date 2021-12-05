@@ -14,8 +14,12 @@
         <v-card class="articleCard">
           <b>{{ article.name }}</b>
           <p>{{ article.description }}</p>
-          <p>Price: {{ article.price }}</p>
-          <p>Owner: {{ article.seller }}</p>
+          <p>Price: {{ article.price }} eth</p>
+          <p>Sold by: {{ article.seller }}</p>
+          <p v-if="article.buyer != null">Bought by: {{ buyerText(article, account) }}</p>
+          <div class="buyButtonWrapper">
+            <v-btn class="buyButton" color="success" v-if="shouldShowBuyButton(article)" v-on:click="buyArticle(article)" text>Buy</v-btn>
+          </div>
         </v-card>
       </div>
     </div>
@@ -110,24 +114,39 @@ export default {
       this.balance = await Web3Manager.getBalanceForAccount(this.account);
       await web3Manager.connectToContract();
       let lastArticle = await web3Manager.getLastArticle()
-      this.articles.push(lastArticle)
+      console.log("Last article = ");
+      console.log(lastArticle);
+      if (lastArticle != null) {
+        this.articles.push(lastArticle)
+      }
     },
     async sellNewArticle() {
       this.dialog = false;
       try {
-        let rawArticle = await Web3Manager.publishArticle(this.newArticle.name, this.newArticle.description, this.newArticle.price, this.account);
-        this.articles.push({
-          name: rawArticle.name,
-          description: rawArticle.description,
-          price: rawArticle.price,
-          seller: rawArticle.seller,
-        });
+        await Web3Manager.publishArticle(this.newArticle.name, this.newArticle.description, this.newArticle.price, this.account);
       } catch (err) {
         alert(err);
       }
     },
+    async buyArticle(article) {
+      try {
+        await Web3Manager.buyArticle(`${article.price}`);
+      } catch (err) {
+        alert(err);
+      }
+    },
+    buyerText(article, account) {
+      console.log("article.buyer = " + article.buyer);
+      console.log("account = " + account);
+      return article.buyer.toLowerCase() == account.toLowerCase() ? "You" : article.buyer
+    },
+    shouldShowBuyButton(article) {
+      return article.seller.toLowerCase() != this.account.toLowerCase()
+    }
   },
   components: {},
+  computed: {
+  }
 };
 </script>
 
@@ -171,6 +190,11 @@ export default {
 
 .form {
   padding: 2rem;
+}
+
+.buyButtonWrapper {
+  display: grid;
+  justify-content: right;
 }
 </style>
 
