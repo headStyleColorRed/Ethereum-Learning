@@ -14,13 +14,25 @@ contract ChainList {
 
     // Variables
     uint articleCounter;
+    address payable contractOwner;
     mapping (uint => Article) public articles;
 
     // Events
     event LogSellArticle(uint indexed _id, address indexed _seller, string name, uint256 price);
     event LogBuyArticle(uint indexed _id, address indexed _seller, address indexed _buyer, string name, uint256 price);
 
-    // Methods
+    // Init
+    constructor() {
+      contractOwner = payable(msg.sender);
+    }
+
+    // Deactivate
+    function kill() public {
+      require(msg.sender == contractOwner, "Only the contract owner can deactivate this contract");
+      selfdestruct(contractOwner);
+    }
+
+    // + + + + + + + + + + + + + + + + + + +  M E T H O D S + + + + + + + + + + + + + + + + + + + + //
     function sellArticle(string memory _name, string memory _description, uint256 _price) public {      // Update Index
       articleCounter++;
 
