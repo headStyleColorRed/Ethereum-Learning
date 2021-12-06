@@ -21,14 +21,19 @@ contract ChainList {
     event LogSellArticle(uint indexed _id, address indexed _seller, string name, uint256 price);
     event LogBuyArticle(uint indexed _id, address indexed _seller, address indexed _buyer, string name, uint256 price);
 
+    // Modifiers
+    modifier onlyOwner() {
+      require(msg.sender == contractOwner, "Only the contract owner can deactivate this contract");
+      _;
+    }
+
     // Init
     constructor() {
       contractOwner = payable(msg.sender);
     }
 
     // Deactivate
-    function kill() public {
-      require(msg.sender == contractOwner, "Only the contract owner can deactivate this contract");
+    function kill() public onlyOwner {
       selfdestruct(contractOwner);
     }
 
