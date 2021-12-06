@@ -113,7 +113,7 @@ export default {
     async getBalance() {
       this.balance = await Web3Manager.getBalanceForAccount(this.account);
       await web3Manager.connectToContract();
-      let lastArticle = await web3Manager.getLastArticle()
+      let lastArticle = await web3Manager.getArticlesForSale()
       console.log("Last article = ");
       console.log(lastArticle);
       if (lastArticle != null) {

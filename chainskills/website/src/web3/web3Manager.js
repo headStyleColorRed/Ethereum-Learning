@@ -70,17 +70,21 @@ async function connectToContract() {
   return
 }
 
-async function getLastArticle() {
-  let rawArticle = await contract.methods.getArticle().call()
-  if (isNullAddress(rawArticle._seller)) return null
+async function getArticlesForSale() {
+  let rawArticle = await contract.methods.getArticlesForSale().call()
+  // if (isNullAddress(rawArticle._seller)) return null
 
-  return {
-    description: rawArticle._description,
-    name: rawArticle._name,
-    price: rawArticle._price,
-    seller: rawArticle._seller,
-    buyer: isNullAddress(rawArticle._buyer) ? null : rawArticle._buyer
-  }
+  // return {
+  //   description: rawArticle._description,
+  //   name: rawArticle._name,
+  //   price: rawArticle._price,
+  //   seller: rawArticle._seller,
+  //   buyer: isNullAddress(rawArticle._buyer) ? null : rawArticle._buyer
+  // }
+}
+
+function parseArticles(rawArticles) {
+  console.log(rawArticles);
 }
 
 function publishArticle(name, description, price, account) {
@@ -138,7 +142,7 @@ export default {
   sendMoneyToAnotherAccount,
   getBalanceForAccount,
   connectToContract,
-  getLastArticle,
+  getArticlesForSale,
   publishArticle,
   buyArticle,
   isNullAddress,
