@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.10;
 
-contract ChainList {
+import "./Parent.sol";
+
+contract ChainList is Parent {
     // Custom types
     struct Article {
       uint id;
@@ -14,23 +16,23 @@ contract ChainList {
 
     // Variables
     uint articleCounter;
-    address payable contractOwner;
+    // address payable contractOwner;  - implemented on parent
     mapping (uint => Article) public articles;
 
     // Events
     event LogSellArticle(uint indexed _id, address indexed _seller, string name, uint256 price);
     event LogBuyArticle(uint indexed _id, address indexed _seller, address indexed _buyer, string name, uint256 price);
 
-    // Modifiers
-    modifier onlyOwner() {
-      require(msg.sender == contractOwner, "Only the contract owner can deactivate this contract");
-      _;
-    }
+    // Modifiers - implemented on parent
+    // modifier onlyOwner() {
+    //   require(msg.sender == contractOwner, "Only the contract owner can deactivate this contract");
+    //   _;
+    // }
 
-    // Init
-    constructor() {
-      contractOwner = payable(msg.sender);
-    }
+    // Init - implemented on parent
+    // constructor() {
+    //   contractOwner = payable(msg.sender);
+    // }
 
     // Deactivate
     function kill() public onlyOwner {
