@@ -50,8 +50,9 @@ contract ChainList {
       emit LogBuyArticle(article.id, article.seller, article.buyer, article.name, article.price);
     }
 
-    function getNumberOfArticles() public view returns (uint) {
-      return (articleCounter);
+    function getArticleWithId(uint _id) public view returns (Article memory article) {
+      require(articleCounter >= _id, "This article doesn't exist");             // Article exists on mapping
+      return (articles[_id]);
     }
 
     function getArticlesForSale() public view returns(uint[] memory) {

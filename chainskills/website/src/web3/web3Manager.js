@@ -71,32 +71,39 @@ async function connectToContract() {
 }
 
 async function getArticlesForSale() {
-  let rawArticle = await contract.methods.getArticlesForSale().call()
-  // if (isNullAddress(rawArticle._seller)) return null
+  let rawArticles = await contract.methods.getArticlesForSale().call()
+  let articles = new Array()
 
-  // return {
-  //   description: rawArticle._description,
-  //   name: rawArticle._name,
-  //   price: rawArticle._price,
-  //   seller: rawArticle._seller,
-  //   buyer: isNullAddress(rawArticle._buyer) ? null : rawArticle._buyer
-  // }
+  for (const articleId of rawArticles) {
+    let article = await getArticleWithId(articleId)
+    articles.push(article)
+  }
+
+  return articles.length == 0 ? null : articles
 }
 
-function parseArticles(rawArticles) {
-  console.log(rawArticles);
+async function getArticleWithId(id) {
+  let article = await contract.methods.getArticleWithId(id).call() 
+  return {
+    id: id,
+    description: article.description,
+    name: article.name,
+    price: article.price,
+    seller: article.seller,
+    buyer: isNullAddress(article._buyer) ? null : article._buyer
+  }
 }
 
 function publishArticle(name, description, price, account) {
   contract.methods.sellArticle(name, description, price).send({ from: account, gas: 500000 }).catch((err) => { throw err.message })
 }
 
-function buyArticle(value) {
-  contract.methods.buyArticle().send({ from: coinbase, value: web3.utils.toWei(value, "ether") }).catch((err) => { throw err.message })
+function buyArticle(value, id) {
+  contract.methods.buyArticle(id).send({ from: coinbase, value: web3.utils.toWei(value, "ether") }).catch((err) => { throw err.message })
 }
 
 async function sellEventListener() {
-  await contract.events.LogSellArticle({  
+  await contract.events.LogSellArticle({
     filter: {}, fromBlock: 0
   }, () => { })
     .on('data', (event) => {

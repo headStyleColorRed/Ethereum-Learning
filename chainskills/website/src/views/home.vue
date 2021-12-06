@@ -113,11 +113,9 @@ export default {
     async getBalance() {
       this.balance = await Web3Manager.getBalanceForAccount(this.account);
       await web3Manager.connectToContract();
-      let lastArticle = await web3Manager.getArticlesForSale()
-      console.log("Last article = ");
-      console.log(lastArticle);
-      if (lastArticle != null) {
-        this.articles.push(lastArticle)
+      let articles = await web3Manager.getArticlesForSale()
+      if (articles != null) {
+        this.articles = articles
       }
     },
     async sellNewArticle() {
@@ -130,14 +128,12 @@ export default {
     },
     async buyArticle(article) {
       try {
-        await Web3Manager.buyArticle(`${article.price}`);
+        Web3Manager.buyArticle(`${article.price}`, article.id);
       } catch (err) {
         alert(err);
       }
     },
     buyerText(article, account) {
-      console.log("article.buyer = " + article.buyer);
-      console.log("account = " + account);
       return article.buyer.toLowerCase() == account.toLowerCase() ? "You" : article.buyer
     },
     shouldShowBuyButton(article) {
