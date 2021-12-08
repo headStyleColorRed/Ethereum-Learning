@@ -38,3 +38,4 @@
     2. await web3.eth.getAccounts()
     3. Get contract instance = Greetings.deployed().then((instance) => { app = instance })
     4. app.getGreeting() or app.getGreeting(from: "enter an account") // REading doesn't require gas, nor transaction. 
+    
